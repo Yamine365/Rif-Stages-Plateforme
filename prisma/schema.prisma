@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id    String @id @default(uuid())
+  name  String @unique // 'admin', 'rh', 'tuteur', 'stagiaire', 'ecole', 'universite'
+  users User[]
+}
+
+model User {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  password    String
+  name        String?
+  roleId      String
+  role        Role        @relation(fields: [roleId], references: [id])
+  isValidated Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  stagiaires  Stagiaire[]
+}
+
+model Stagiaire {
+  id        String   @id @default(uuid())
+  prenom    String
+  nom       String
+  email     String   @unique
+  formation String
+  niveau    String // '3eme', 'terminale', 'bts', etc.
+  ecoleId   String
+  ecole     User     @relation(fields: [ecoleId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
