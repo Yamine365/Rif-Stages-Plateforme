@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState,useEffect  } from 'react'
 import { mockCandidaturesExternes } from '@/lib/mock-data'
 import { DEPARTEMENTS, type CandidatureExterneStatus, type CandidatureExterne } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -75,7 +75,9 @@ const niveauLabels: Record<string, string> = {
 }
 
 export default function CandidaturesPage() {
-  const [candidatures, setCandidatures] = useState<CandidatureExterne[]>(mockCandidaturesExternes)
+  
+const [candidatures, setCandidatures] = useState<CandidatureExterne[]>([])
+
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedCandidature, setSelectedCandidature] = useState<CandidatureExterne | null>(null)
@@ -125,34 +127,49 @@ export default function CandidaturesPage() {
     setIsActionDialogOpen(true)
   }
 
-  const confirmAction = () => {
-    if (!selectedCandidature) return
+const confirmAction = () => {
+  if (!selectedCandidature) return
 
-    setCandidatures(prev => prev.map(c => {
-      if (c.id === selectedCandidature.id) {
-        return {
-          ...c,
-          status: actionType === 'accept' ? 'acceptee' : 'refusee',
-          commentairesRH: comment || c.commentairesRH,
-          departementAffecte: actionType === 'accept' ? departement : undefined,
-          dateDecision: new Date().toISOString().split('T')[0],
-        }
+  const updated = candidatures.map(c => {
+    if (c.id === selectedCandidature.id) {
+      return {
+        ...c,
+        status: (actionType === 'accept' ? 'acceptee' : 'refusee') as CandidatureExterneStatus,
+        commentairesRH: comment || c.commentairesRH,
+        departementAffecte: actionType === 'accept' ? departement : undefined,
+        dateDecision: new Date().toISOString().split('T')[0],
       }
-      return c
-    }))
-    
-    setIsActionDialogOpen(false)
-    setSelectedCandidature(null)
-  }
+    }
+    return c
+  })
 
-  const markAsReviewing = (candidature: CandidatureExterne) => {
-    setCandidatures(prev => prev.map(c => {
-      if (c.id === candidature.id) {
-        return { ...c, status: 'en_revision' }
-      }
-      return c
-    }))
+  setCandidatures(updated)
+  localStorage.setItem('candidatures', JSON.stringify(updated))
+
+  setIsActionDialogOpen(false)
+  setSelectedCandidature(null)
+}
+
+
+
+const markAsReviewing = (candidature: CandidatureExterne) => {
+  const updated = candidatures.map(c =>
+    c.id === candidature.id ? { ...c, status: 'en_revision' as CandidatureExterneStatus } : c
+  )
+
+  setCandidatures(updated)
+  localStorage.setItem('candidatures', JSON.stringify(updated))
+}
+
+
+  useEffect(() => {
+  const stored = localStorage.getItem('candidatures')
+  if (stored) {
+    setCandidatures(JSON.parse(stored))
+  } else {
+    setCandidatures(mockCandidaturesExternes)
   }
+}, [])
 
   return (
     <div className="space-y-6">

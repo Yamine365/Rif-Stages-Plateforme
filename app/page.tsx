@@ -95,13 +95,27 @@ export default function LandingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
+    const nouvelleCandidature = {
+      id: Date.now().toString(),
+      ...formData,
+      cvFileName: cvFile?.name,
+      lettreFileName: lettreFile?.name,
+      status: 'nouvelle',
+      dateSoumission: new Date().toISOString().split('T')[0],
+    }
+
+    const stored = localStorage.getItem('candidatures')
+    const candidatures = stored ? JSON.parse(stored) : []
+
+    candidatures.unshift(nouvelleCandidature)
+
+    localStorage.setItem('candidatures', JSON.stringify(candidatures))
+
     setIsSubmitting(false)
     setIsSuccess(true)
   }
+
 
   const resetForm = () => {
     setFormData({
@@ -371,9 +385,9 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm text-sidebar-foreground/70">
-                <li>stages@groupe-rif.fr</li>
-                <li>+33 5 56 00 00 00</li>
-                <li>Bordeaux, France</li>
+                <li>contact@grouperif.com</li>
+                <li>+33 6 51 94 88 73</li>
+                <li>Paris, France</li>
               </ul>
             </div>
             <div>
@@ -386,7 +400,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-sidebar-border text-center text-sm text-sidebar-foreground/50">
-            © 2024 Groupe RIF. Tous droits réservés.
+            © 2026 Groupe RIF. Tous droits réservés.
           </div>
         </div>
       </footer>
@@ -596,7 +610,7 @@ export default function LandingPage() {
                         <Input
                           id="lettre"
                           type="file"
-                          accept=".pdf,.doc,.docx"
+                          accept=".pdf"
                           onChange={handleLettreChange}
                           className="hidden"
                           required

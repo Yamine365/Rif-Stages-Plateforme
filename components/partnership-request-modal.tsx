@@ -17,6 +17,16 @@ import { Loader2, CheckCircle2, Building2 } from 'lucide-react'
 interface PartnershipRequestModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
+  onNewPartnership?: (partenariat: Partenariat) => void
+}
+
+interface Partenariat {
+  nomUniversite: string
+  responsableNom: string
+  responsablePrenom: string
+  responsableEmail: string
+  responsableTelephone: string
+  message: string
 }
 
 export function PartnershipRequestModal({

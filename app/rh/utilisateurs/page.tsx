@@ -37,11 +37,52 @@ import {
   Link as LinkIcon,
 } from 'lucide-react'
 
+/* =======================
+   TYPES & MOCK DATA
+======================= */
+
+type Partenariat = {
+  id: string
+  nomEntreprise: string
+  secteur: string
+  nomContact: string
+  email: string
+  type: string
+  statut: string
+}
+
+const mockPartenariats: Partenariat[] = [
+  {
+    id: '1',
+    nomEntreprise: 'TechCorp',
+    secteur: 'IT',
+    nomContact: 'Ali Ben Salah',
+    email: 'ali@techcorp.com',
+    type: 'Stage',
+    statut: 'Actif',
+  },
+  {
+    id: '2',
+    nomEntreprise: 'BuildPro',
+    secteur: 'BTP',
+    nomContact: 'Sami Khelifi',
+    email: 'sami@buildpro.com',
+    type: 'Emploi',
+    statut: 'En attente',
+  },
+]
+
+/* =======================
+   COMPONENT
+======================= */
+
 export default function UtilisateursPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [partenariats, setPartenariats] = useState<Partenariat[]>(mockPartenariats)
   const [isAddTuteurDialogOpen, setIsAddTuteurDialogOpen] = useState(false)
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
-  const [selectedStagiaire, setSelectedStagiaire] = useState<typeof mockStagiaires[0] | null>(null)
+  const [selectedStagiaire, setSelectedStagiaire] =
+    useState<(typeof mockStagiaires)[0] | null>(null)
 
   const [newTuteur, setNewTuteur] = useState({
     nom: '',
@@ -51,8 +92,11 @@ export default function UtilisateursPage() {
     poste: '',
   })
 
-  // Filter functions
-  const filteredStagiaires = mockStagiaires.filter(s => {
+  /* =======================
+     FILTERS
+  ======================= */
+
+  const filteredStagiaires = mockStagiaires.filter((s) => {
     if (!searchTerm) return true
     const searchLower = searchTerm.toLowerCase()
     return (
@@ -63,7 +107,7 @@ export default function UtilisateursPage() {
     )
   })
 
-  const filteredTuteurs = mockTuteurs.filter(t => {
+  const filteredTuteurs = mockTuteurs.filter((t) => {
     if (!searchTerm) return true
     const searchLower = searchTerm.toLowerCase()
     return (
@@ -74,25 +118,57 @@ export default function UtilisateursPage() {
     )
   })
 
+  const filteredPartenariats = partenariats.filter((p) => {
+    if (!searchTerm) return true
+    const searchLower = searchTerm.toLowerCase()
+    return (
+      p.nomEntreprise.toLowerCase().includes(searchLower) ||
+      p.nomContact.toLowerCase().includes(searchLower) ||
+      p.email.toLowerCase().includes(searchLower)
+    )
+  })
+
+
+  /* =======================
+     ACTIONS
+  ======================= */
+
+  const openPartnershipDetails = (partenariat: Partenariat) => {
+    console.log('Détails partenariat :', partenariat)
+  }
+
   const handleAddTuteur = () => {
-    // In real app, this would create the user
     setIsAddTuteurDialogOpen(false)
     setNewTuteur({ nom: '', prenom: '', email: '', departement: '', poste: '' })
   }
 
-  const openAssignDialog = (stagiaire: typeof mockStagiaires[0]) => {
+  const openAssignDialog = (stagiaire: (typeof mockStagiaires)[0]) => {
     setSelectedStagiaire(stagiaire)
     setIsAssignDialogOpen(true)
   }
 
   const getTuteurForStagiaire = (stagiaireId: string) => {
-    const convention = mockConventions.find(c => c.stagiaireId === stagiaireId)
+    const convention = mockConventions.find(
+      (c) => c.stagiaireId === stagiaireId
+    )
     if (!convention) return null
-    return mockTuteurs.find(t => 
-      t.prenom + ' ' + t.nom === convention.contenu.tuteurNom ||
-      t.nom + ' ' + t.prenom === convention.contenu.tuteurNom
+
+    return mockTuteurs.find(
+      (t) =>
+        `${t.prenom} ${t.nom}` === convention.contenu.tuteurNom ||
+        `${t.nom} ${t.prenom}` === convention.contenu.tuteurNom
     )
   }
+
+
+
+
+  /* ===== JSX CONTINUE ICI ===== */
+
+
+
+
+
 
   return (
     <div className="space-y-6">
@@ -135,6 +211,11 @@ export default function UtilisateursPage() {
             <Users className="h-4 w-4" />
             Tuteurs ({mockTuteurs.length})
           </TabsTrigger>
+          <TabsTrigger value="partenariats" className="gap-2">
+            <LinkIcon className="h-4 w-4" />
+            Partenariats ({mockPartenariats.length})
+          </TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="stagiaires" className="mt-6">
@@ -202,9 +283,10 @@ export default function UtilisateursPage() {
                                 <LinkIcon className="h-4 w-4 mr-1" />
                                 {tuteur ? 'Réassigner' : 'Assigner'}
                               </Button>
-                              <Button variant="ghost" size="icon">
+                              <Button asChild variant="ghost" size="icon">
+                                <a href={`mailto:${stagiaire.email}`} target="_blank" rel="noreferrer">
                                 <Mail className="h-4 w-4" />
-                                <span className="sr-only">Contacter</span>
+                                <span className="sr-only">Contacter</span></a>
                               </Button>
                             </div>
                           </TableCell>
@@ -278,9 +360,10 @@ export default function UtilisateursPage() {
                               <Key className="h-4 w-4" />
                               <span className="sr-only">Réinitialiser mot de passe</span>
                             </Button>
-                            <Button variant="ghost" size="icon">
+                            <Button asChild variant="ghost" size="icon">
+                              <a href={`mailto:${tuteur.email}`} target="_blank" rel="noreferrer">
                               <Mail className="h-4 w-4" />
-                              <span className="sr-only">Contacter</span>
+                              <span className="sr-only">Contacter</span></a>
                             </Button>
                           </div>
                         </TableCell>
@@ -299,6 +382,120 @@ export default function UtilisateursPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="partenariats" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Liste des partenariats</CardTitle>
+              <CardDescription>
+                {filteredPartenariats.length} demande(s) de partenariat
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Entreprise</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {filteredPartenariats.map((partenariat) => (
+                      <TableRow key={partenariat.id}>
+                        {/* Entreprise */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-xs font-semibold text-primary">
+                                {partenariat.nomEntreprise.charAt(0)}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{partenariat.nomEntreprise}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {partenariat.secteur}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        {/* Contact */}
+                        <TableCell>
+                          <p className="text-sm font-medium">{partenariat.nomContact}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {partenariat.email}
+                          </p>
+                        </TableCell>
+
+                        {/* Type */}
+                        <TableCell>
+                          <Badge variant="secondary">{partenariat.type}</Badge>
+                        </TableCell>
+
+                        {/* Statut */}
+                        <TableCell>
+                          <Badge
+                            variant={
+                              partenariat.statut === 'Accepté'
+                                ? 'default'
+                                : partenariat.statut === 'Refusé'
+                                ? 'destructive'
+                                : 'outline'
+                            }
+                          >
+                            {partenariat.statut}
+                          </Badge>
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openPartnershipDetails(partenariat)}
+                            >
+                              Voir
+                            </Button> */}
+                            
+
+                            <Button asChild variant="ghost" size="icon">
+                              <a href={`mailto:${partenariat.email}`} target="_blank" rel="noreferrer">
+                              <Mail className="h-4 w-4" />
+                              <span className="sr-only">Contacter</span></a>
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                    {filteredPartenariats.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          className="text-center py-8 text-muted-foreground"
+                        >
+                          Aucune demande de partenariat
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+
+                    
+
+
       </Tabs>
 
       {/* Add Tuteur Dialog */}
@@ -416,6 +613,7 @@ export default function UtilisateursPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
     </div>
   )
 }
