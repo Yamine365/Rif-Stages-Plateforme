@@ -578,7 +578,7 @@ export default function LandingPage() {
                         <Input
                           id="cv"
                           type="file"
-                          accept=".pdf,.doc,.docx"
+                          accept=".pdf"
                           onChange={handleCvChange}
                           className="hidden"
                           required
